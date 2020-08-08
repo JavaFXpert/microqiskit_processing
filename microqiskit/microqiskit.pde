@@ -143,7 +143,7 @@ class Simulator {
 
 
   //List<List> simulate(QuantumCircuit qc, int shots, String get) {
-  List<List> simulate(QuantumCircuit qc, int shots, String get) {
+  Object simulate(QuantumCircuit qc, int shots, String get) {
     List<List> k = new ArrayList();
     for (int j = 0; j < Math.pow(2, qc.numQubits); j++) {
       k.add(Arrays.asList(0.0d, 0.0d));
@@ -164,8 +164,8 @@ class Simulator {
             int b0 = (int)(i0 + Math.pow(2, (j + 1)) * i1);
             int b1 = (int)(b0 + Math.pow(2, j));
             if (gate.get(0).equals("x")) {
-              println("b0: " + b0);
-              println("b1: " + b1);
+              //println("b0: " + b0);
+              //println("b1: " + b1);
               List temp0 = k.get(b0);
               List temp1 = k.get(b1);
               k.set(b0, temp1);
@@ -232,7 +232,7 @@ class Simulator {
           Math.pow(((Double)k.get(i).get(1)).doubleValue(), 2.0d)));
       }
       if (get.equals("counts")) {
-        List<String> me = new ArrayList(); //<>//
+        List<String> me = new ArrayList();
         for (int idx = 0; idx < shots; idx++) {
           double cumu = 0.0;
           boolean un = true;
@@ -242,12 +242,12 @@ class Simulator {
             cumu += p;
             if (r < cumu && un) {
               String bitStr = Integer.toString(j, 2);
-              println("bitStr: " + bitStr);
+              //println("bitStr: " + bitStr);
               String padStr = "" + (int)Math.pow(10, qc.numQubits - bitStr.length());
               padStr = padStr.substring(1);
-              println("padStr: " + padStr);
+              //println("padStr: " + padStr);
               String rawOut = padStr + bitStr;
-              println("rawOut: " + rawOut);
+              //println("rawOut: " + rawOut);
               List<String> outList = new ArrayList();
               for (int i = 0; i < qc.numClbits; i++) {
                 outList.add("0");
@@ -260,7 +260,7 @@ class Simulator {
                   Character.toString(rawOut.charAt(qc.numQubits - 1 - intQBitIdx)));
               }
               String out = String.join("", outList).toString();
-              println("outA: " + out);
+              //println("outA: " + out);
               me.add(String.join("", outList));
               un = false;
             }
@@ -268,16 +268,16 @@ class Simulator {
         }
         Map<String,Integer> counts = new HashMap();
         for (int meIdx = 0; meIdx < me.size(); meIdx++) { //<>//
-          String out = me.get(meIdx);
-          println("out: " + out);
-          //if (counts.hasOwnProperty(out)) {
-            //counts.put(out, ((Integer)counts.get(out)).intValue() + 1);
-          //} else {
-            //counts[out] = 1;
-          //}
+          String meas = me.get(meIdx);
+          //println("meas: " + meas);
+          
+          if (counts.containsKey(meas)) {
+            counts.put(meas, ((Integer)counts.get(meas)).intValue() + 1);
+          } else {
+            counts.put(meas, 1);
+          }
         }
-        //return counts;
-        return null;
+        return counts;
       }
     }
     return null;
@@ -294,11 +294,11 @@ psiMinus.h(1);
 //psiMinus.z(1);
 psiMinus.measure(0, 0);
 psiMinus.measure(1, 1);
-List<List> psiMinusStatevector =
+Object psiMinusStatevector =
   new Simulator().simulate(psiMinus, 0, "statevector");
 println("psiMinusStatevector: " + psiMinusStatevector);
 
-List<List> psiMinusCounts =
+Object psiMinusCounts =
   new Simulator().simulate(psiMinus, 5, "counts");
 println("psiMinusCounts: " + psiMinusCounts);
 

@@ -99,15 +99,15 @@ class QuantumCircuit {
 
 class Simulator {
   double r2 = 0.70710678118;
+  double noise = 0.0;
 
-  //double[][] superpose(int[] x, int[] y) {
-  //  double[][] sup = new double[2][2];
-  //  sup[0][0] = (x[0] + y[0]) * r2;
-  //  sup[0][1] = (x[1] + y[1]) * r2;
-  //  sup[1][0] = (x[0] - y[0]) * r2;
-  //  sup[1][1] = (x[1] - y[1]) * r2;
-  //  return sup;
-  //};
+  Simulator() {
+    this(0.0);
+  }
+  
+  Simulator(double noise) {
+    this.noise = noise;
+  }
 
   List<List<Double>> superpose(List<Double> x, List<Double> y) {
     List<List<Double>> sup = new ArrayList(Arrays.asList(
@@ -142,7 +142,6 @@ class Simulator {
   };
 
 
-  //List<List> simulate(QuantumCircuit qc, int shots, String get) {
   Object simulate(QuantumCircuit qc, int shots, String get) {
     List<List> k = new ArrayList();
     for (int j = 0; j < Math.pow(2, qc.numQubits); j++) {
@@ -231,15 +230,34 @@ class Simulator {
         probs.add((Math.pow(((Double)k.get(i).get(0)).doubleValue(), 2.0d) + 
           Math.pow(((Double)k.get(i).get(1)).doubleValue(), 2.0d)));
       }
+
+      List<Double> uniformProbs = new ArrayList();
+      for (int i = 0; i < k.size(); i++) {
+        uniformProbs.add(new Double(1.0 / probs.size()));
+      }
+      
       if (get.equals("counts")) {
         List<String> me = new ArrayList();
         for (int idx = 0; idx < shots; idx++) {
           double cumu = 0.0;
           boolean un = true;
           double r = Math.random();
-          for (int j = 0; j < probs.size(); j++) {
-            double p = (Double)probs.get(j);
+          
+          // Take noise into account
+          double random_noise = Math.random();
+          boolean noisy = random_noise < this.noise;
+            
+          for (int j = 0; j < probs.size(); j++) { //<>//
+            double p = 0.0;
+            if (!noisy) {
+              p = (Double)probs.get(j);
+            }
+            else {
+              p = (Double)uniformProbs.get(j);
+            }
+            
             cumu += p;
+            
             if (r < cumu && un) {
               String bitStr = Integer.toString(j, 2);
               //println("bitStr: " + bitStr);
@@ -259,15 +277,16 @@ class Simulator {
                 outList.set(qc.numClbits - 1 - intCBitIdx,
                   Character.toString(rawOut.charAt(qc.numQubits - 1 - intQBitIdx)));
               }
-              String out = String.join("", outList).toString();
+              //String out = String.join("", outList).toString();
               //println("outA: " + out);
-              me.add(String.join("", outList));
               un = false;
+              
+              me.add(String.join("", outList));
             }
           }
         }
         Map<String,Integer> counts = new HashMap();
-        for (int meIdx = 0; meIdx < me.size(); meIdx++) { //<>//
+        for (int meIdx = 0; meIdx < me.size(); meIdx++) {
           String meas = me.get(meIdx);
           //println("meas: " + meas);
           
@@ -285,7 +304,7 @@ class Simulator {
   }
 }
 
-Simulator simulator = new Simulator();
+Simulator simulator = new Simulator(0.02);
 // Example circuits:
 QuantumCircuit psiMinus = new QuantumCircuit(2, 2);
 psiMinus.h(0);
@@ -296,9 +315,9 @@ psiMinus.measure(0, 0);
 psiMinus.measure(1, 1);
 Object psiMinusStatevector = simulator.simulate(psiMinus, 0, "statevector");
 println("psiMinusStatevector: " + psiMinusStatevector);
-println(simulator.simulate(psiMinus, 5, "counts"));
+println(simulator.simulate(psiMinus, 1000, "counts"));
 
-
+/*
 QuantumCircuit ghz = new QuantumCircuit(3, 3);
 ghz.h(0);
 ghz.cx(0, 1);
@@ -324,3 +343,4 @@ qc.measure(1, 1);
 qc.measure(2, 2);
 println(qc.data);
 println(simulator.simulate(qc, 5, "counts"));
+*/

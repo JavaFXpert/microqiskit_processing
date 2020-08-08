@@ -129,7 +129,7 @@ class Simulator {
         ((Double)x.get(0).doubleValue() * Math.cos(theta / 2) +
         ((Double)y.get(1).doubleValue()) * Math.sin(theta / 2)),
         ((Double)x.get(1).doubleValue() * Math.cos(theta / 2) -
-        ((Double)y.get(1).doubleValue()) * Math.sin(theta / 2))
+        ((Double)y.get(0).doubleValue()) * Math.sin(theta / 2))
       )),
       new ArrayList(Arrays.asList(
         ((Double)y.get(0).doubleValue() * Math.cos(theta / 2) +
@@ -285,27 +285,31 @@ class Simulator {
   }
 }
 
-
+Simulator simulator = new Simulator();
+// Example circuits:
 QuantumCircuit psiMinus = new QuantumCircuit(2, 2);
 psiMinus.h(0);
-psiMinus.h(1);
-//psiMinus.x(1);
-//psiMinus.cx(0, 1);
-//psiMinus.z(1);
+psiMinus.x(1);
+psiMinus.cx(0, 1);
+psiMinus.z(1);
 psiMinus.measure(0, 0);
 psiMinus.measure(1, 1);
-Object psiMinusStatevector =
-  new Simulator().simulate(psiMinus, 0, "statevector");
+Object psiMinusStatevector = simulator.simulate(psiMinus, 0, "statevector");
 println("psiMinusStatevector: " + psiMinusStatevector);
-
-Object psiMinusCounts =
-  new Simulator().simulate(psiMinus, 5, "counts");
-println("psiMinusCounts: " + psiMinusCounts);
+println(simulator.simulate(psiMinus, 5, "counts"));
 
 
+QuantumCircuit ghz = new QuantumCircuit(3, 3);
+ghz.h(0);
+ghz.cx(0, 1);
+ghz.cx(0, 2);
+ghz.measure(0, 0);
+ghz.measure(1, 1);
+ghz.measure(2, 2);
+Object ghzStatevector = simulator.simulate(ghz, 0, "statevector");
+println("ghzStatevector: " + ghzStatevector);
+println(simulator.simulate(ghz, 5, "counts"));
 
-
-/*
 QuantumCircuit qc = new QuantumCircuit(3, 3);
 qc.x(0);
 qc.rx(Math.PI, 1);
@@ -318,29 +322,5 @@ qc.ry(Math.PI / 4, 1);
 qc.measure(0, 0);
 qc.measure(1, 1);
 qc.measure(2, 2);
-*/
-
-/*
-qc.x(0);
-qc.rx(Math.PI, 1);
-qc.h(1);
-qc.cx(2, 1);
-qc.rz(Math.PI/2, 1);
-qc.ry(Math.PI/4, 1);
-qc.measure(1, 1);
-*/
-
-//println(psiMinus.numQubits);
-//println(psiMinus.numClbits);
-//println(psiMinus.data);
-
-
-//Simulator simulator = new Simulator();
-//println(simulator.simulate(qc, 1024, "statevector"));
-
-/*
-int[] a = {1, 2};
-int[] b = {1, 2};
-println(simulator.superpose(a, b).toString());
-println(simulator.turn(a, b, Math.PI).toString());
-*/
+println(qc.data);
+println(simulator.simulate(qc, 5, "counts"));
